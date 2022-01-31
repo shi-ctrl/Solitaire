@@ -82,7 +82,7 @@ class Deck {
 	}
 }
 
-class TableauRow {
+class CardRow {
 	private List<PlayedCard> column = new ArrayList<PlayedCard>();
 
 	public List<PlayedCard> getColumn() {
@@ -99,10 +99,10 @@ class TableauRow {
 }
 
 class Tableau {
-	TableauRow[] tableauBoard = new TableauRow[7];
+	CardRow[] tableauBoard = new CardRow[7];
 	
 	Tableau () {
-		for (int i = 0; i<7; i++) tableauBoard[i] = new TableauRow();
+		for (int i = 0; i<7; i++) tableauBoard[i] = new CardRow();
 	}
 	
 	public List<Card> makeBoard (List<Card> deck) {
@@ -152,18 +152,55 @@ class Tableau {
 	}
 }
 
+class Foundation {
+	CardRow[] foundationBoard = new CardRow[7];
+	
+	Foundation () {
+		for (int i = 0; i<4; i++) foundationBoard[i] = new CardRow();
+	}
+	
+	public void addCard(Card card, int columnPos) {
+		int columnSize = foundationBoard[columnPos].getColumn().size();
+		
+		if (columnSize==0) {
+			// if empty, check if ace
+			if (card.getFace()==1) foundationBoard[columnPos].addCard(new PlayedCard(card, true));
+			else System.out.println("Not ace");
+		} else {
+			char lastSuit = foundationBoard[columnPos].getColumn().get(columnSize-1).getSuit();
+			char curSuit = card.getSuit();
+			// if not empty, check the suit of the foundation (this will be expanded upon for incremental increases)
+			if (curSuit==lastSuit) foundationBoard[columnPos].addCard(new PlayedCard(card, true));
+			else System.out.println("Invalid");
+			
+		}
+	}
+	
+	public void display() {
+		for (int i = 0; i<4; i++) {
+			int columnSize = foundationBoard[i].getColumn().size();
+			for (int j = 0; j<columnSize; j++) {
+				foundationBoard[i].getColumn().get(j).display();
+			}
+			System.out.println();
+		}
+	}
+}
+
 public class Solitaire {
 
 	public static void main(String[] args) {
 		List<Card> currentDeck = new Deck().getDeck();
-		Tableau tableau = new Tableau();		
+		Tableau tableau = new Tableau();
+		Foundation foundation = new Foundation();
 		Collections.shuffle(currentDeck);
 		
 		Card kingCard = new Card('d',13);
 		Card blackCard = new Card('s',10);
 		Card redCard = new Card('h',10);
+		Card aceCard = new Card('d',1);
 		
-		int proofSwitch = 1;
+		int proofSwitch = 3;
 		
 		if (proofSwitch==1) {
 			tableau.addCard(redCard, 0);
@@ -172,11 +209,17 @@ public class Solitaire {
 			tableau.addCard(blackCard, 0);
 		} else if (proofSwitch==2) {
 			currentDeck = tableau.makeBoard(currentDeck);
+		} else if (proofSwitch==3) {
+			foundation.addCard(redCard, 0);
+			foundation.addCard(aceCard, 0);
+			foundation.addCard(redCard, 0);
+			foundation.addCard(kingCard, 0);
 		}
 		
 		
 		//currentDeck = tableau.makeBoard(currentDeck);
 		tableau.display();
+		foundation.display();
 
 	}
 
